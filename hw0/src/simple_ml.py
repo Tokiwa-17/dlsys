@@ -105,7 +105,8 @@ def softmax_loss(Z, y):
         Average softmax loss over the sample.
     """
     ### BEGIN YOUR CODE
-    pass
+    batch_size, num_classes = Z.shape
+    return 1 / batch_size * (np.log(np.exp(Z).sum(axis=1)) - Z[np.arange(batch_size), y]).sum(axis=0)
     ### END YOUR CODE
 
 
