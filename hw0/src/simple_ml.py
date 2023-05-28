@@ -131,18 +131,8 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
     """
     ### BEGIN YOUR CODE
     def normalize(X):
-        """
-        row-wise normalization
-        Args:
-            X(np.ndarray[np.float32]): mxn
-        Returns:
-            normalized_X(float)
-        """
-        row, col = X.shape
-        for i in range(row):
-            factor = 1 / (np.ones(col).dot(X[i]))
-            X[i] *= factor
-        return X
+        norms = np.sum(X, axis=1, keepdims=True)
+        return X / norms
 
     sample_num, num_classes = X.shape
     iter = np.ceil(sample_num / batch).astype(np.int32)
@@ -178,7 +168,25 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    def relu(x):
+        return np.maximum(0, x)
+
+    def normalize(X):
+        norms = np.sum(X, axis=1, keepdims=True)
+        return X / norms
+
+    sample_num, num_classes = X.shape
+    iter = np.ceil(sample_num / batch).astype(np.int32)
+    k = W2.shape[-1]
+    for i in range(iter):
+        l, r = i * batch, min((i + 1) * batch, sample_num)
+        _X = X[l:r, :]
+        Z1 = relu(_X @ W1)
+        Iy = np.eye(k)[y[l:r]]
+        G2 = normalize(np.exp(Z1 @ W2)) - Iy
+        G1 = (Z1 > 0) * (G2 @ W2.T)
+        np.subtract(W1, lr * 1 / batch * _X.T @ G1, out=W1)
+        np.subtract(W2, lr * 1 / batch * Z1.T @ G2, out=W2)
     ### END YOUR CODE
 
 
