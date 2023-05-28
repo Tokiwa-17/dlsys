@@ -1,6 +1,7 @@
 import struct
 import numpy as np
 import gzip
+from copy import deepcopy
 try:
     from simple_ml_ext import *
 except:
@@ -129,7 +130,28 @@ def softmax_regression_epoch(X, y, theta, lr = 0.1, batch=100):
         None
     """
     ### BEGIN YOUR CODE
-    pass
+    def normalize(X):
+        """
+        row-wise normalization
+        Args:
+            X(np.ndarray[np.float32]): mxn
+        Returns:
+            normalized_X(float)
+        """
+        row, col = X.shape
+        for i in range(row):
+            factor = 1 / (np.ones(col).dot(X[i]))
+            X[i] *= factor
+        return X
+
+    sample_num, num_classes = X.shape
+    iter = np.ceil(sample_num / batch).astype(np.int32)
+    k = theta.shape[-1]
+
+    for i in range(iter):
+        l, r = i * batch, min((i + 1) * batch, sample_num)
+        Iy = np.eye(k)[y[l:r]]
+        np.subtract(theta,  lr * (1 / batch) * X[l:r, :].T @ (normalize(np.exp(X[l:r, :] @ theta)) - Iy), out=theta)
     ### END YOUR CODE
 
 
