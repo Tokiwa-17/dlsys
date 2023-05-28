@@ -20,7 +20,7 @@ def add(x, y):
         Sum of x + y
     """
     ### BEGIN YOUR CODE
-    pass
+    return x + y
     ### END YOUR CODE
 
 
@@ -48,7 +48,44 @@ def parse_mnist(image_filename, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR CODE
-    pass
+    def read_imgs(image_filename):
+        data = gzip.open(image_filename, 'rb').read()
+        # fmt of struct unpack, > means big endian, i means integer, well, iiii mean 4 integers
+        fmt = '>iiii'
+        offset = 0
+        magic_number, img_number, height, width = struct.unpack_from(fmt, data, offset)
+        offset += struct.calcsize(fmt)
+        image_size = height * width  # 28x28
+        fmt = '>{}B'.format(image_size)
+        images = np.empty((img_number, height, width), dtype=np.float32)
+        for i in range(img_number):
+            images[i] = np.array(struct.unpack_from(fmt, data, offset)).reshape((height, width))
+            offset += struct.calcsize(fmt)
+        return images
+
+    X = read_imgs(image_filename)
+
+    def read_labels(label_filename):
+        data = gzip.open(label_filename, 'rb').read()
+        fmt = '>ii'
+        offset = 0
+        _, label_number = struct.unpack_from(fmt, data, offset)
+        offset += struct.calcsize(fmt)
+        fmt = '>B'
+        labels = np.empty(label_number, dtype=np.uint8)
+        for i in range(label_number):
+            labels[i] = struct.unpack_from(fmt, data, offset)[0]
+            offset += struct.calcsize(fmt)
+        return labels
+
+    y = read_labels(label_filename)
+
+    def normalize(X):
+        _max, _min = np.max(X), np.min(X)
+        return (X - _min) / (_max - _min)
+
+    normalized_X = normalize(X).reshape(-1, 28 * 28)
+    return normalized_X, y
     ### END YOUR CODE
 
 
