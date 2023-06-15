@@ -98,7 +98,8 @@ class EWiseDiv(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        lhs, rhs = node.inputs
+        return out_grad / rhs, -out_grad * (lhs / (rhs * rhs))
         ### END YOUR SOLUTION
 
 
@@ -117,7 +118,7 @@ class DivScalar(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return out_grad * 1.0 / self.scalar
         ### END YOUR SOLUTION
 
 
@@ -208,7 +209,9 @@ class MatMul(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        # outgrad [a, c], lhs [a, b], rhs [b, c]
+        lhs, rhs = node.inputs
+        return matmul(out_grad, transpose(rhs)), matmul(transpose(lhs), out_grad)
         ### END YOUR SOLUTION
 
 
@@ -224,7 +227,7 @@ class Negate(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return -out_grad
         ### END YOUR SOLUTION
 
 

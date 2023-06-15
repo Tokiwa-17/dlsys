@@ -297,7 +297,6 @@ def gradient_check(f, *args, tol=1e-6, backward=False, **kwargs):
     assert error < tol
     return computed_grads
 
-
 def test_divide_backward():
     gradient_check(ndl.divide, ndl.Tensor(np.random.randn(5, 4)), ndl.Tensor(5 + np.random.randn(5, 4)))
 
