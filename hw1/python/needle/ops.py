@@ -193,7 +193,7 @@ class Summation(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return Tensor(array_api.ones_like(node.inputs[0].numpy()))
         ### END YOUR SOLUTION
 
 
