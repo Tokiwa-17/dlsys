@@ -295,12 +295,16 @@ def exp(a):
 class ReLU(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return array_api.maximum(a, 0)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        input_shape = node.inputs[0].shape
+        ones_idx = array_api.where(node.inputs[0].numpy().flatten() > 0)[0]
+        res = array_api.zeros_like(node.inputs[0].numpy()).flatten()
+        res[ones_idx] = 1.0
+        return out_grad * reshape(Tensor(res), input_shape)
         ### END YOUR SOLUTION
 
 
