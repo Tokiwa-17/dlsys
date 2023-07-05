@@ -371,7 +371,6 @@ def submit_backward():
 
 ##############################################################################
 ### TESTS/SUBMISSION CODE FOR find_topo_sort
-
 def test_topo_sort():
     # Test case 1
     a1, b1 = ndl.Tensor(np.asarray([[0.88282157]])), ndl.Tensor(np.asarray([[0.90170084]]))

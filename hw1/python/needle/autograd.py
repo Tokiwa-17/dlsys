@@ -401,7 +401,6 @@ def compute_gradient_of_variables(output_tensor, out_grad):
     raise NotImplementedError()
     ### END YOUR SOLUTION
 
-
 def find_topo_sort(node_list: List[Value]) -> List[Value]:
     """Given a list of nodes, return a topological sort list of nodes ending in them.
 
@@ -411,7 +410,17 @@ def find_topo_sort(node_list: List[Value]) -> List[Value]:
     sort.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    topo_orders = []
+    visited = []
+    def topo_sort_dfs(node: Value):
+        for _node in node.inputs:
+            topo_sort_dfs(_node)
+        if node not in visited:
+            topo_orders.append(node)
+            visited.append(node)
+
+    topo_sort_dfs(node_list[0])
+    return topo_orders
     ### END YOUR SOLUTION
 
 
