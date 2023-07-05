@@ -123,7 +123,28 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """
 
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    # def relu(x):
+    #     return np.maximum(0, x)
+    #
+    def normalize(X: Tensor) -> Tensor:
+        norms = ndl.broadcast_to(ndl.reshape(ndl.summation(X, axes=1), (X.shape[0], 1)), X.shape)
+        return X / norms
+
+    sample_num, num_classes = X.shape
+    iter = int((sample_num + batch - 1) / batch)
+    #iter = np.ceil(sample_num / batch).astype(np.int32)
+    k = W2.shape[-1]
+    for i in range(iter):
+          l, r = i * batch, min((i + 1) * batch, sample_num)
+          _X = Tensor(X[l:r, :])
+          Z = ndl.relu(_X @ W1) @ W2
+          y_one_hot = array_api.zeros_like(Z.numpy())
+          y_one_hot[array_api.arange(Z.shape[0]), y[l:r]] = 1
+          loss = softmax_loss(Z, Tensor(y_one_hot))
+          loss.backward()
+          W1 = Tensor(W1.numpy() - lr * W1.grad.numpy())
+          W2 = Tensor(W2.numpy() - lr * W2.grad.numpy())
+    return W1, W2
     ### END YOUR SOLUTION
 
 
