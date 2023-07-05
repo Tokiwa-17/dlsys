@@ -202,7 +202,18 @@ class Summation(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return Tensor(array_api.ones_like(node.inputs[0].numpy()))
+        input_shape = node.inputs[0].shape
+        broadcast_shape = list(input_shape)
+        if self.axes:
+            for i in self.axes:
+                broadcast_shape[i] = 1
+        else:
+            broadcast_shape = [1] * len(broadcast_shape)
+        if isinstance(out_grad, Tensor) == False:
+            out_grad = Tensor(out_grad)
+        out_grad = reshape(out_grad, broadcast_shape)
+        return Tensor(out_grad.numpy() * array_api.ones_like(node.inputs[0].numpy()))
+
         ### END YOUR SOLUTION
 
 
