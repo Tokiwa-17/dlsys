@@ -157,7 +157,8 @@ class Reshape(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return Tensor(array_api.ones_like(node.inputs[0]))
+        input_shape = node.inputs[0].shape
+        return Tensor(reshape(out_grad, input_shape).numpy() * array_api.ones_like(node.inputs[0]))
         ### END YOUR SOLUTION
 
 
