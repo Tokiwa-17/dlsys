@@ -174,7 +174,16 @@ class BroadcastTo(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        reduce_axis = []
+        in_shape = node.inputs[0].shape
+        out_shape = out_grad.shape
+        if len(in_shape) < len(out_shape):
+            in_shape = tuple([1] * (len(out_shape) - len(in_shape)) + list(in_shape))
+
+        for i in range(len(out_shape) - 1, -1, -1):
+            if (in_shape[i] != out_shape[i]):
+                reduce_axis.append(i)
+        return reshape(summation(out_grad, tuple(reduce_axis)), node.inputs[0].shape)
         ### END YOUR SOLUTION
 
 
