@@ -138,7 +138,7 @@ class Transpose(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return Tensor(array_api.ones_like(node.inputs[0]))
         ### END YOUR SOLUTION
 
 
