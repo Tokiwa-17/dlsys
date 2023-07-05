@@ -5,9 +5,11 @@ import numpy as np
 import sys
 sys.path.append('python/')
 import needle as ndl
+import numpy as array_api
+from needle.autograd import Tensor
 
 
-def parse_mnist(image_filesname, label_filename):
+def parse_mnist(image_filename, label_filename):
     """ Read an images and labels file in MNIST format.  See this page:
     http://yann.lecun.com/exdb/mnist/ for a description of the file format.
 
@@ -23,18 +25,57 @@ def parse_mnist(image_filesname, label_filename):
                 dimension of the data, e.g., since MNIST images are 28x28, it
                 will be 784.  Values should be of type np.float32, and the data
                 should be normalized to have a minimum value of 0.0 and a
-                maximum value of 1.0.
+                maximum value of 1.0. The normalization should be applied uniformly
+                across the whole dataset, _not_ individual images.
 
-            y (numpy.ndarray[dypte=np.int8]): 1D numpy array containing the
-                labels of the examples.  Values should be of type np.int8 and
+            y (numpy.ndarray[dtype=np.uint8]): 1D numpy array containing the
+                labels of the examples.  Values should be of type np.uint8 and
                 for MNIST will contain the values 0-9.
     """
-    ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
-    ### END YOUR SOLUTION
+    ### BEGIN YOUR CODE
+    def read_imgs(image_filename):
+        data = gzip.open(image_filename, 'rb').read()
+        # fmt of struct unpack, > means big endian, i means integer, well, iiii mean 4 integers
+        fmt = '>iiii'
+        offset = 0
+        magic_number, img_number, height, width = struct.unpack_from(fmt, data, offset)
+        offset += struct.calcsize(fmt)
+        image_size = height * width  # 28x28
+        fmt = '>{}B'.format(image_size)
+        images = np.empty((img_number, height, width), dtype=np.float32)
+        for i in range(img_number):
+            images[i] = np.array(struct.unpack_from(fmt, data, offset)).reshape((height, width))
+            offset += struct.calcsize(fmt)
+        return images
+
+    X = read_imgs(image_filename)
+
+    def read_labels(label_filename):
+        data = gzip.open(label_filename, 'rb').read()
+        fmt = '>ii'
+        offset = 0
+        _, label_number = struct.unpack_from(fmt, data, offset)
+        offset += struct.calcsize(fmt)
+        fmt = '>B'
+        labels = np.empty(label_number, dtype=np.uint8)
+        for i in range(label_number):
+            labels[i] = struct.unpack_from(fmt, data, offset)[0]
+            offset += struct.calcsize(fmt)
+        return labels
+
+    y = read_labels(label_filename)
+
+    def normalize(X):
+        _max, _min = np.max(X), np.min(X)
+        return (X - _min) / (_max - _min)
+
+    normalized_X = normalize(X).reshape(-1, 28 * 28)
+    return normalized_X, y
+    ### END YOUR CODE
 
 
-def softmax_loss(Z, y_one_hot):
+
+def softmax_loss(Z, y):
     """ Return softmax loss.  Note that for the purposes of this assignment,
     you don't need to worry about "nicely" scaling the numerical properties
     of the log-sum-exp computation, but can just compute this directly.
@@ -51,9 +92,11 @@ def softmax_loss(Z, y_one_hot):
         Average softmax loss over the sample. (ndl.Tensor[np.float32])
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
-    ### END YOUR SOLUTION
-
+    batch_size, num_classes = Z.shape
+    #y = Tensor(y.numpy().argmax(axis=1))
+    #return 1 / batch_size * ndl.summation(ndl.log(ndl.summation(ndl.exp(Z), axes=1)) - Tensor(Z.numpy()[array_api.arange(batch_size), y]), axes=0)
+    return 1 / batch_size * ndl.summation(ndl.log(ndl.summation(ndl.exp(Z), axes=1)) - ndl.summation(Z * y, axes=1))
+    ### END YOUR CODE
 
 def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """ Run a single epoch of SGD for a two-layer neural network defined by the

@@ -206,8 +206,11 @@ class Summation(TensorOp):
         input_shape = node.inputs[0].shape
         broadcast_shape = list(input_shape)
         if self.axes:
-            for i in self.axes:
-                broadcast_shape[i] = 1
+            if isinstance(self.axes, tuple) == False:
+                broadcast_shape[self.axes] = 1
+            else:
+                for i in self.axes:
+                    broadcast_shape[i] = 1
         else:
             broadcast_shape = [1] * len(broadcast_shape)
         if isinstance(out_grad, Tensor) == False:
@@ -259,12 +262,12 @@ def negate(a):
 class Log(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return array_api.log(a)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return out_grad / node.inputs[0]
         ### END YOUR SOLUTION
 
 
@@ -275,12 +278,12 @@ def log(a):
 class Exp(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return array_api.exp(a)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return out_grad * exp(node.inputs[0])
         ### END YOUR SOLUTION
 
 
