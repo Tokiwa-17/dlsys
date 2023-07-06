@@ -387,13 +387,15 @@ class LogSumExp(TensorOp):
         maxz = array_api.amax(Z, axis=self.axes, keepdims=True)
         ez = array_api.exp(Z - maxz)
         sez = array_api.sum(ez, axis=self.axes, keepdims=True)
-        #if self.axes:
-        j = 0
         shape = [1] * len(Z.shape)
-        for i in range(len(Z.shape)):
-            if i not in self.axes:
-                shape[i] = node.shape[j]
-                j += 1
+        if self.axes:
+            j = 0
+            for i in range(len(Z.shape)):
+                if i not in self.axes:
+                    shape[i] = node.shape[j]
+                    j += 1
+        else:
+            pass
         out_grad_data = out_grad.reshape(shape).cached_data
         return Tensor(out_grad_data * ez / sez)
         ### END YOUR SOLUTION
