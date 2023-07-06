@@ -133,12 +133,12 @@ class PowerScalar(TensorOp):
 
     def compute(self, a: NDArray) -> NDArray:
         ### BEGIN YOUR SOLUTION
-        return array_api.exp(a)
+        return array_api.power(a, self.scalar)
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return out_grad * Tensor(array_api.exp(node.inputs[0]))
+        return Tensor(self.scalar * array_api.power(node.inputs[0].numpy(), self.scalar - 1))
         ### END YOUR SOLUTION
 
 
@@ -374,12 +374,28 @@ class LogSumExp(TensorOp):
 
     def compute(self, Z):
         ### BEGIN YOUR SOLUTION
-        return array_api.log(array_api.sum(array_api.exp(Z), self.axes))
+        z_max = array_api.amax(Z, axis=self.axes, keepdims=True)
+        tmp = array_api.exp(Z - z_max)
+        s = array_api.sum(tmp, axis=self.axes, keepdims=False)
+        out = array_api.log(s) + z_max.squeeze()
+        return out
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        Z = node.inputs[0].cached_data
+        maxz = array_api.amax(Z, axis=self.axes, keepdims=True)
+        ez = array_api.exp(Z - maxz)
+        sez = array_api.sum(ez, axis=self.axes, keepdims=True)
+        #if self.axes:
+        j = 0
+        shape = [1] * len(Z.shape)
+        for i in range(len(Z.shape)):
+            if i not in self.axes:
+                shape[i] = node.shape[j]
+                j += 1
+        out_grad_data = out_grad.reshape(shape).cached_data
+        return Tensor(out_grad_data * ez / sez)
         ### END YOUR SOLUTION
 
 
