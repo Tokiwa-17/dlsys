@@ -163,12 +163,15 @@ class LayerNorm1d(Module):
         self.dim = dim
         self.eps = eps
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        self.weight = Tensor(np.ones(dim))
+        self.bias = Tensor(np.zeros(dim))
         ### END YOUR SOLUTION
 
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        avg = ops.reshape(x.sum(axes=1) / x.shape[-1], (x.shape[0], 1))
+        var = ops.reshape(((x - avg) ** 2).sum(axes=1) / x.shape[0], (x.shape[0], 1))
+        return ops.broadcast_to(self.weight, x.shape) * (x - avg) / ((var + self.eps) ** 0.5) + ops.broadcast_to(self.bias, x.shape)
         ### END YOUR SOLUTION
 
 
