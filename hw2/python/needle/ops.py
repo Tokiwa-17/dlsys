@@ -391,6 +391,8 @@ class LogSumExp(TensorOp):
         if self.axes:
             j = 0
             for i in range(len(Z.shape)):
+                if isinstance(self.axes, int):
+                    self.axes = [self.axes]
                 if i not in self.axes:
                     shape[i] = node.shape[j]
                     j += 1
