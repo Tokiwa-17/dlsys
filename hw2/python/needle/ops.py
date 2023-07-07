@@ -196,7 +196,7 @@ class Transpose(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return Tensor(array_api.ones_like(node.inputs[0]))
+        return transpose(out_grad, axes=self.axes)
         ### END YOUR SOLUTION
 
 
@@ -253,6 +253,8 @@ def broadcast_to(a, shape):
 class Summation(TensorOp):
     def __init__(self, axes: Optional[tuple] = None):
         self.axes = axes
+        if isinstance(self.axes, int):
+            self.axes = tuple([self.axes])
 
     def compute(self, a):
         ### BEGIN YOUR SOLUTION

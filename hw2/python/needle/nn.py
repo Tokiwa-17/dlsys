@@ -106,7 +106,7 @@ class Linear(Module):
 class Flatten(Module):
     def forward(self, X):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return ops.reshape(X, (X.shape[0], -1))
         ### END YOUR SOLUTION
 
 
@@ -147,13 +147,32 @@ class BatchNorm1d(Module):
         self.eps = eps
         self.momentum = momentum
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        self.weight = Parameter(init.ones(self.dim))
+        self.bias = Parameter(init.zeros(self.dim))
+        self.running_mean = Parameter(init.zeros(self.dim))
+        self.running_var = Parameter(init.ones(self.dim))
         ### END YOUR SOLUTION
 
 
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        batch_size = x.shape[0]
+        if self.training:
+            new_avg = x.sum(axes=0) / x.shape[0]
+            broadcast_avg = ops.broadcast_to(ops.reshape(new_avg, (1, -1)), x.shape)
+            new_var = ((x - broadcast_avg) ** 2).sum(axes=0) / x.shape[0]
+            self.running_mean = (1 - self.momentum) * self.running_mean + self.momentum * new_avg
+            self.running_var = (1 - self.momentum) * self.running_var + self.momentum * new_var
+            broadcast_var = ops.broadcast_to(ops.reshape(new_var, (1, -1)), x.shape)
+            broadcast_weight = ops.broadcast_to(ops.reshape(self.weight, (1, -1)), x.shape)
+            broadcast_bias = ops.broadcast_to(ops.reshape(self.bias, (1, -1)), x.shape)
+            return broadcast_weight * (x - broadcast_avg) / ((broadcast_var + self.eps) ** 0.5) + broadcast_bias
+        else:
+            broadcast_weight = ops.broadcast_to(ops.reshape(self.weight, (1, -1)), x.shape)
+            broadcast_bias = ops.broadcast_to(ops.reshape(self.bias, (1, -1)), x.shape)
+            broadcast_avg = ops.broadcast_to(ops.reshape(self.running_mean, (1, -1), x.shape))
+            broadcast_var = ops.broadcast_to(ops.reshape(self.running_var, (1, -1), x.shape))
+            return broadcast_weight * (x - broadcast_avg) / ((broadcast_var + self.eps) ** 0.5) + broadcast_bias
         ### END YOUR SOLUTION
 
 
