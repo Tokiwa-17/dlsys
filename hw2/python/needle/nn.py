@@ -201,7 +201,10 @@ class Dropout(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        if self.training:
+            samples = np.random.binomial(1, 1 - self.p, x.cached_data.size).reshape(x.shape)
+            return x * Tensor(samples) / (1 - self.p)
+        else: return x
         ### END YOUR SOLUTION
 
 
@@ -212,7 +215,7 @@ class Residual(Module):
 
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        return self.fn(x) + x
         ### END YOUR SOLUTION
 
 
