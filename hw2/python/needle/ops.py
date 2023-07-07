@@ -138,7 +138,7 @@ class PowerScalar(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        return Tensor(self.scalar * array_api.power(node.inputs[0].numpy(), self.scalar - 1))
+        return out_grad * Tensor(self.scalar * array_api.power(node.inputs[0].numpy(), self.scalar - 1))
         ### END YOUR SOLUTION
 
 
@@ -216,7 +216,7 @@ class Reshape(TensorOp):
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
         input_shape = node.inputs[0].shape
-        return Tensor(reshape(out_grad, input_shape).numpy() * array_api.ones_like(node.inputs[0]))
+        return reshape(out_grad, input_shape)
         ### END YOUR SOLUTION
 
 
