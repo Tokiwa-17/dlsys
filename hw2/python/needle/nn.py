@@ -149,8 +149,8 @@ class BatchNorm1d(Module):
         ### BEGIN YOUR SOLUTION
         self.weight = Parameter(init.ones(self.dim))
         self.bias = Parameter(init.zeros(self.dim))
-        self.running_mean = Parameter(init.zeros(self.dim))
-        self.running_var = Parameter(init.ones(self.dim))
+        self.running_mean = Tensor(init.zeros(self.dim))
+        self.running_var = Tensor(init.ones(self.dim))
         ### END YOUR SOLUTION
 
 
@@ -170,8 +170,8 @@ class BatchNorm1d(Module):
         else:
             broadcast_weight = ops.broadcast_to(ops.reshape(self.weight, (1, -1)), x.shape)
             broadcast_bias = ops.broadcast_to(ops.reshape(self.bias, (1, -1)), x.shape)
-            broadcast_avg = ops.broadcast_to(ops.reshape(self.running_mean, (1, -1), x.shape))
-            broadcast_var = ops.broadcast_to(ops.reshape(self.running_var, (1, -1), x.shape))
+            broadcast_avg = ops.broadcast_to(ops.reshape(self.running_mean, (1, -1)), x.shape)
+            broadcast_var = ops.broadcast_to(ops.reshape(self.running_var, (1, -1)), x.shape)
             return broadcast_weight * (x - broadcast_avg) / ((broadcast_var + self.eps) ** 0.5) + broadcast_bias
         ### END YOUR SOLUTION
 
