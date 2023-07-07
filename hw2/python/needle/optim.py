@@ -25,7 +25,11 @@ class SGD(Optimizer):
 
     def step(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        for p in self.params:
+            grad = self.u.get(p, 0) * self.momentum + (1 - self.momentum) * (p.grad.data + self.weight_decay * p.data)
+            grad = ndl.Tensor(grad, dtype=p.dtype)
+            self.u[p] = grad
+            p.data -= self.lr * grad
         ### END YOUR SOLUTION
 
 
