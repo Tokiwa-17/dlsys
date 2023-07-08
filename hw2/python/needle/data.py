@@ -105,18 +105,25 @@ class DataLoader:
         self.shuffle = shuffle
         self.batch_size = batch_size
         if not self.shuffle:
-            self.ordering = np.array_split(np.arange(len(dataset)), 
+            self.ordering = np.array_split(np.arange(len(dataset)),
                                            range(batch_size, len(dataset), batch_size))
+        else:
+            self.ordering = np.array_split(np.random.permutation(len(dataset)),
+                                           range(batch_size, len(dataset), batch_size))
+        self.idx = -1
 
     def __iter__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
         ### END YOUR SOLUTION
         return self
 
     def __next__(self):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        self.idx += 1
+        if self.idx >= len(self.ordering):
+            self.idx = -1
+            raise StopIteration
+        return [Tensor(x) for x in self.dataset[self.ordering[self.idx]]]
         ### END YOUR SOLUTION
 
 def parse_mnist(image_filename, label_filename):
@@ -198,7 +205,6 @@ class MNISTDataset(Dataset):
 
     def __getitem__(self, index) -> object:
         ### BEGIN YOUR SOLUTION
-        assert index >= 0 and index < len(self)
         if self.transforms:
             return self.apply_transforms(self.X[index]), self.y[index]
         return self.X[index, :], self.y[index]
@@ -206,7 +212,7 @@ class MNISTDataset(Dataset):
 
     def __len__(self) -> int:
         ### BEGIN YOUR SOLUTION
-        return self.X.shape[0]
+        return len(self.X)
         ### END YOUR SOLUTION
 
 class NDArrayDataset(Dataset):
