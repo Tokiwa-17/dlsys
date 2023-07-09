@@ -23,9 +23,9 @@ def ResidualBlock(dim, hidden_dim, norm=nn.BatchNorm1d, drop_prob=0.1):
 def MLPResNet(dim, hidden_dim=100, num_blocks=3, num_classes=10, norm=nn.BatchNorm1d, drop_prob=0.1):
     ### BEGIN YOUR SOLUTION
     modules = nn.Sequential(
-        nn.Linear(dim, hidden_dim),
+        nn.Linear(dim, hidden_dim), nn.ReLU(),
         *[ResidualBlock(hidden_dim, hidden_dim // 2, norm, drop_prob) for _ in range(num_blocks)],
-        nn.Linear(hidden_dim, dim),
+        nn.Linear(hidden_dim, num_classes),
     )
     return nn.Sequential(modules)
     ### END YOUR SOLUTION
@@ -36,12 +36,26 @@ def MLPResNet(dim, hidden_dim=100, num_blocks=3, num_classes=10, norm=nn.BatchNo
 def epoch(dataloader, model, opt=None):
     np.random.seed(4)
     ### BEGIN YOUR SOLUTION
-    if opt == None: model.eval()
+    training = True if opt else False
+    if training:
+        opt = opt(model.parameters())
+        opt.reset_grad()
+    else: model.eval()
+    loss_func = nn.SoftmaxLoss()
+    loss, acc = 0., 0.
+    l = len(dataloader.dataset)
+
     for idx, batch in enumerate(dataloader):
         batch_size = batch[0].shape[0]
         batch_x, batch_y = batch[0].reshape((batch_size, -1)), batch[1]
-        pred = model(batch_x)
-        print('test')
+        logits = model(batch_x)
+        iter_loss = loss_func(logits, batch_y)
+        iter_loss.backward()
+        loss += iter_loss.data
+        pred = np.argmax(logits.cached_data, axis=1)
+        acc += (pred == batch_y.cached_data).sum()
+        if opt: opt.step()
+    return loss / l, acc / l
     ### END YOUR SOLUTION
 
 
@@ -63,9 +77,11 @@ def train_mnist(batch_size=100, epochs=10, optimizer=ndl.optim.Adam,
     mnist_test_dataloader = ndl.data.DataLoader(dataset=mnist_test_dataset,
                                                 batch_size=batch_size,
                                                 shuffle=False)
-    for _ in range(epochs):
-        epoch(mnist_train_dataloader, model, optimizer)
-        #epoch(mnist_test_dataloader, )
+    for _epoch in range(epochs):
+        train_loss, train_acc = epoch(mnist_train_dataloader, model, optimizer)
+        test_loss, test_acc = epoch(mnist_test_dataloader, model, None)
+        if _epoch == epochs - 1:
+            return (train_acc, train_loss, test_acc, test_loss)
     ### END YOUR SOLUTION
 
 

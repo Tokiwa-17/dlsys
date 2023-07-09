@@ -202,7 +202,7 @@ class Dropout(Module):
     def forward(self, x: Tensor) -> Tensor:
         ### BEGIN YOUR SOLUTION
         if self.training:
-            samples = np.random.binomial(1, 1 - self.p, x.cached_data.size).reshape(x.shape)
+            samples = init.randb(*x.shape, p = 1 - self.p)
             return x * Tensor(samples) / (1 - self.p)
         else: return x
         ### END YOUR SOLUTION
