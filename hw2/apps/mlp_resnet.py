@@ -37,25 +37,27 @@ def epoch(dataloader, model, opt=None):
     np.random.seed(4)
     ### BEGIN YOUR SOLUTION
     training = True if opt else False
-    if training:
-        opt = opt(model.parameters())
-        opt.reset_grad()
+    if training: model.train()
     else: model.eval()
     loss_func = nn.SoftmaxLoss()
-    loss, acc = 0., 0.
-    l = len(dataloader.dataset)
+    loss, acc = [], 0.
+    n_sample = 0
 
     for idx, batch in enumerate(dataloader):
-        batch_size = batch[0].shape[0]
-        batch_x, batch_y = batch[0].reshape((batch_size, -1)), batch[1]
+        batch_x, batch_y = batch[0], batch[1]
+        batch_x = batch_x.reshape((batch_x.shape[0], -1))
+        n_sample += batch_x.shape[0]
         logits = model(batch_x)
         iter_loss = loss_func(logits, batch_y)
-        iter_loss.backward()
-        loss += iter_loss.data
+        #loss += iter_loss.cached_data
+        loss.append(iter_loss.cached_data)
         pred = np.argmax(logits.cached_data, axis=1)
         acc += (pred == batch_y.cached_data).sum()
-        if opt: opt.step()
-    return loss / l, acc / l
+        if opt:
+            iter_loss.backward()
+            opt.step()
+            opt.reset_grad()
+    return 1 - acc / n_sample, np.mean(loss)
     ### END YOUR SOLUTION
 
 
