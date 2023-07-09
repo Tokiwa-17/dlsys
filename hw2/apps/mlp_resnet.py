@@ -73,17 +73,18 @@ def train_mnist(batch_size=100, epochs=10, optimizer=ndl.optim.Adam,
                                                 data_path / "train-labels-idx1-ubyte.gz")
     mnist_train_dataloader = ndl.data.DataLoader(dataset=mnist_train_dataset,
                                                  batch_size=batch_size,
-                                                 shuffle=False)
+                                                 shuffle=True)
     mnist_test_dataset = ndl.data.MNISTDataset(data_path / "t10k-images-idx3-ubyte.gz",
                                                data_path / "t10k-labels-idx1-ubyte.gz")
     mnist_test_dataloader = ndl.data.DataLoader(dataset=mnist_test_dataset,
                                                 batch_size=batch_size,
                                                 shuffle=False)
+    opt = optimizer(model.parameters(), lr=lr, weight_decay=weight_decay)
     for _epoch in range(epochs):
-        train_loss, train_acc = epoch(mnist_train_dataloader, model, optimizer)
-        test_loss, test_acc = epoch(mnist_test_dataloader, model, None)
-        if _epoch == epochs - 1:
-            return (train_acc, train_loss, test_acc, test_loss)
+        train_acc, train_loss = epoch(mnist_train_dataloader, model, opt)
+        test_acc, test_loss = epoch(mnist_test_dataloader, model, None)
+
+    return (train_acc, train_loss, test_acc, test_loss)
     ### END YOUR SOLUTION
 
 
