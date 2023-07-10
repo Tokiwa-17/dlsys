@@ -226,7 +226,7 @@ permute_params = [
 def test_permute(device, params):
     dims = params['dims']
     axes = params['axes']
-    _A = np.random.randn(*dims)
+    _A = np.random.randn(*dims).astype(np.float32)
     A = nd.array(_A, device=device)
     lhs = np.transpose(_A, axes=axes)
     rhs = A.permute(axes)

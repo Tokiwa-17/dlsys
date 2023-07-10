@@ -270,7 +270,9 @@ class NDArray:
         """
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        new_shape = tuple(np.take(self._shape, new_axes))
+        new_strides = tuple(np.take(self._strides, new_axes))
+        return self.make(new_shape, new_strides, self._device, self._handle, self._offset)
         ### END YOUR SOLUTION
 
     def broadcast_to(self, new_shape):
