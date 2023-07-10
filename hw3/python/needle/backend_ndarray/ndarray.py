@@ -2,6 +2,7 @@ import operator
 import math
 from functools import reduce
 import numpy as np
+from copy import deepcopy
 from . import ndarray_backend_numpy
 from . import ndarray_backend_cpu
 
@@ -293,7 +294,12 @@ class NDArray:
         """
 
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        new_strides = list(self._strides)
+        assert len(self._shape) == len(new_shape)
+        for i in range(len(self._shape)):
+            if self._shape[i] == 1: new_strides[i] = 0
+            else: assert self._shape[i] == new_shape[i]
+        return self.make(tuple(new_shape), tuple(new_strides), self._device, self._handle, self._offset)
         ### END YOUR SOLUTION
 
     ### Get and set elements
@@ -354,9 +360,16 @@ class NDArray:
             ]
         )
         assert len(idxs) == self.ndim, "Need indexes equal to number of dimensions"
-
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        for axis in idxs:
+            assert axis.step >= 0 and (axis.stop - axis.start) >= 0
+        new_shape = [int((axis.stop - axis.start) / axis.step) for axis in idxs]
+        new_stride, offset = list(self._strides), 0
+        for i, axis in enumerate(idxs):
+            if axis.start >= 0: offset += self._strides[i] * axis.start
+            else: offset += self._strides[i] * (self._shape[i] + axis.start)
+            new_stride[i] *= axis.step
+        return self.make(tuple(new_shape), tuple(new_stride), self._device, self._handle, offset)
         ### END YOUR SOLUTION
 
     def __setitem__(self, idxs, other):
