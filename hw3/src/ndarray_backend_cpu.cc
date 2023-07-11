@@ -46,42 +46,74 @@ void Fill(AlignedArray* out, scalar_t val) {
 
 
 
-void Compact(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> shape,
-             std::vector<uint32_t> strides, size_t offset) {
-  /**
-   * Compact an array in memory
-   *
-   * Args:
-   *   a: non-compact representation of the array, given as input
-   *   out: compact version of the array to be written
-   *   shape: shapes of each dimension for a and out
-   *   strides: strides of the *a* array (not out, which has compact strides)
-   *   offset: offset of the *a* array (not out, which has zero offset, being compact)
-   *
-   * Returns:
-   *  void (you need to modify out directly, rather than returning anything; this is true for all the
-   *  function will implement here, so we won't repeat this note.)
-   */
-  /// BEGIN YOUR SOLUTION
-  
-  /// END YOUR SOLUTION
-}
+        void Compact(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> shape,
+                     std::vector<uint32_t> strides, size_t offset) {
+            /**
+             * Compact an array in memory
+             *
+             * Args:
+             *   a: non-compact representation of the array, given as input
+             *   out: compact version of the array to be written
+             *   shape: shapes of each dimension for a and out
+             *   strides: strides of the *a* array (not out, which has compact strides)
+             *   offset: offset of the *a* array (not out, which has zero offset, being compact)
+             *
+             * Returns:
+             *  void (you need to modify out directly, rather than returning anything; this is true for all the
+             *  function will implement here, so we won't repeat this note.)
+             */
+            /// BEGIN YOUR SOLUTION
+            long long cnt = 0, ndim = shape.size();
+            long long len = std::accumulate(shape.begin(), shape.end(), 1, std::multiplies<long long>());
+            std::vector<uint32_t> indices(ndim, 0);
+            while(cnt < len) {
+                long long idx = 0;
+                for (int i = 0; i < ndim; i++) {
+                    idx += indices[i] * strides[i];
+                }
+                (out -> ptr)[cnt++] = a.ptr[idx + offset];
+                int carry = 0;
+                indices[ndim - 1] += 1;
+                for (int i = ndim - 1; i >= 0; i--) {
+                    indices[i] = indices[i] + carry;
+                    carry = indices[i] / shape[i];
+                    indices[i] %= shape[i];
+                }
+            }
+            /// END YOUR SOLUTION
+        }
 
 void EwiseSetitem(const AlignedArray& a, AlignedArray* out, std::vector<uint32_t> shape,
                   std::vector<uint32_t> strides, size_t offset) {
-  /**
-   * Set items in a (non-compact) array
-   *
-   * Args:
-   *   a: _compact_ array whose items will be written to out
-   *   out: non-compact array whose items are to be written
-   *   shape: shapes of each dimension for a and out
-   *   strides: strides of the *out* array (not a, which has compact strides)
-   *   offset: offset of the *out* array (not a, which has zero offset, being compact)
-   */
-  /// BEGIN YOUR SOLUTION
-  
-  /// END YOUR SOLUTION
+    /**
+     * Set items in a (non-compact) array
+     *
+     * Args:
+     *   a: _compact_ array whose items will be written to out
+     *   out: non-compact array whose items are to be written
+    `*   shape: shapes of each dimension for a and out
+     *   strides: strides of the *out* array (not a, which has compact strides)
+     *   offset: offset of the *out* array (not a, which has zero offset, being compact)
+    */
+    /// BEGIN YOUR SOLUTION
+    long long cnt = 0, ndim = shape.size();
+    long long len = std::accumulate(shape.begin(), shape.end(), 1LL, std::multiplies<long long>());
+    std::vector<uint32_t> indices(ndim, 0);
+    while(cnt < len) {
+        long long idx = 0;
+        for (int i = 0; i < ndim; i++) {
+            idx += indices[i] * strides[i];
+        }
+        (out -> ptr)[idx + offset] = a.ptr[cnt++];
+        indices[ndim - 1] ++;
+        int carry = 0;
+        for (int i = ndim - 1; i >= 0; i--) {
+            indices[i] = indices[i] + carry;
+            carry = indices[i] / shape[i];
+            indices[i] = indices[i] % shape[i];
+        }
+    }
+    /// END YOUR SOLUTION
 }
 
 void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vector<uint32_t> shape,
@@ -99,10 +131,25 @@ void ScalarSetitem(const size_t size, scalar_t val, AlignedArray* out, std::vect
    *   strides: strides of the out array
    *   offset: offset of the out array
    */
-
-  /// BEGIN YOUR SOLUTION
-  
-  /// END YOUR SOLUTION
+    /// BEGIN YOUR SOLUTION
+    long long cnt = 0, ndim = shape.size();
+    std::vector<uint32_t> indices(ndim, 0);
+    while(cnt < size) {
+        long long idx = 0;
+        for (int i = 0; i < ndim; i++) {
+            idx += indices[i] * strides[i];
+        }
+        out -> ptr[idx + offset] = val;
+        cnt ++;
+        int carry = 0;
+        indices[ndim - 1] ++;
+        for (int i = ndim - 1; i >= 0; i--) {
+            indices[i] += carry;
+            carry = indices[i] / shape[i];
+            indices[i] %= shape[i];
+        }
+    }
+    /// END YOUR SOLUTION
 }
 
 void EwiseAdd(const AlignedArray& a, const AlignedArray& b, AlignedArray* out) {

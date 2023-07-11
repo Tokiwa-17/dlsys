@@ -363,7 +363,7 @@ class NDArray:
         ### BEGIN YOUR SOLUTION
         for axis in idxs:
             assert axis.step >= 0 and (axis.stop - axis.start) >= 0
-        new_shape = [int((axis.stop - axis.start) / axis.step) for axis in idxs]
+        new_shape = [int(1 + (axis.stop - axis.start - 1) / axis.step) for axis in idxs]
         new_stride, offset = list(self._strides), 0
         for i, axis in enumerate(idxs):
             if axis.start >= 0: offset += self._strides[i] * axis.start
@@ -570,7 +570,7 @@ def array(a, dtype="float32", device=None):
 
 def empty(shape, dtype="float32", device=None):
     device = device if device is not None else default_device()
-    return devie.empty(shape, dtype)
+    return device.empty(shape, dtype)
 
 
 def full(shape, fill_value, dtype="float32", device=None):
