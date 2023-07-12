@@ -406,7 +406,15 @@ void ReduceMax(const AlignedArray& a, AlignedArray* out, size_t reduce_size) {
    */
 
   /// BEGIN YOUR SOLUTION
-  
+  size_t out_size = out -> size;
+  for (size_t i = 0; i < out_size; i ++) {
+    float max_val = a.ptr[i * reduce_size];
+    for (size_t j = 0; j < reduce_size; j++)  {
+        if (i * reduce_size + j >= a.size) break;
+        max_val = std::max(max_val, a.ptr[i * reduce_size + j]);
+    }
+    out -> ptr[i] = max_val;
+  }
   /// END YOUR SOLUTION
 }
 
@@ -421,7 +429,15 @@ void ReduceSum(const AlignedArray& a, AlignedArray* out, size_t reduce_size) {
    */
 
   /// BEGIN YOUR SOLUTION
-  
+  size_t out_size = out -> size;
+  for (size_t i = 0; i < out_size; i ++) {
+    float sum_val = 0.0f;
+    for (size_t j = 0; j < reduce_size; j++) {
+        if (i * reduce_size + j >= a.size) break;
+        sum_val += a.ptr[i * reduce_size + j];
+    }
+    out -> ptr[i] = sum_val;
+  }
   /// END YOUR SOLUTION
 }
 
