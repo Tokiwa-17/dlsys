@@ -335,7 +335,15 @@ void Matmul(const AlignedArray& a, const AlignedArray& b, AlignedArray* out, uin
    */
 
   /// BEGIN YOUR SOLUTION
-  
+  for (int i = 0; i < m; i++) {
+    for (int j = 0; j < p; j++) {
+        float res = 0.0f;
+        for (int k = 0; k < n; k++) {
+            res += a.ptr[i * n + k] * b.ptr[k * p + j];
+        }
+        out -> ptr[i * p + j] = res;
+    }
+  }
   /// END YOUR SOLUTION
 }
 
